@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: echo "thisismyfile" >> myfile
+
+      - name: Test
+        run: ls myfile
+
+      - name: Prepare archive
+        run: tar -zcvf ./${{ matrix.os }}.tar.gz myfile
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./${{ matrix.os }}.tar.gz
